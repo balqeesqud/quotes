@@ -8,11 +8,14 @@ import com.sun.tools.javac.Main;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
@@ -26,7 +29,7 @@ class AppTest {
 
             assertNotNull(quotes);
             assertFalse(quotes.isEmpty());
-            assertEquals(138, quotes.size());
+            assertEquals(155, quotes.size());
 
             Quote firstQuote = quotes.get(0);
             assertEquals("I am good, but not an angel. I do sin, but I am not the devil. I am just a small girl in a big world trying to find someone to love.", firstQuote.getText());
@@ -51,7 +54,15 @@ class AppTest {
         assertTrue(quotes.contains(selectedQuote));
     }
 
+    @Test
+    public void testGetQuoteFromApi() throws IOException {
+        Quote quote = App.getQuoteFromApi();
+        assertNotNull(quote);
+        assertNotNull(quote.getBody());
+        assertNotNull(quote.getAuthor());
     }
+
+}
 
 
 
