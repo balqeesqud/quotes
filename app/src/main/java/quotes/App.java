@@ -18,7 +18,7 @@ import java.util.Random;
 public class App {
 
 
-    public static void main(String[] args) {
+    public static void main(String [] args) {
         Gson gson = new Gson(); //creates an instance of the Gson class, which will be used to parse JSON data into Java objects.
         List<Quote> quotes = new ArrayList<>();  // creating an ArrayList named quotes to store the parsed quotes.
         // Each element in this list will be an instance of the Quote class.
@@ -37,7 +37,7 @@ public class App {
             BufferedReader reader = new BufferedReader(new FileReader("app/src/main/resources/recentQuotes.json"));
 
             // fromJson() used to parse the JSON data read from the reader into an array of Quote objects.
-            Quote[] quoteArray = gson.fromJson(reader, Quote[].class); // Once the BF sees [ ] in the Json file, the return values will be and [ ]
+            Quote[] quoteArray = gson.fromJson(reader, Quote[].class); // Once the BR sees [ ] in the Json file, the return values will be and [ ] of objects
 
 
             //parsed Quote objects are then added to the quotes list using the addAll method.
@@ -61,8 +61,34 @@ public class App {
 
             System.out.println("Quote: " + selectedQuote.getText());
             System.out.println("Author: " + selectedQuote.getAuthor());
+            System.out.println(selectedQuote);
         } else {
             System.out.println("No quotes available.");
         }
     }
 }
+
+//Another Solution
+
+//public class App {
+//    public static void main(String[] args) {
+//        Gson gson = new Gson();
+//        try {
+//            BufferedReader reader = new BufferedReader(new FileReader("src\main\resources\recentQuotes.json"));
+//            Quote[] quoteList = gson.fromJson(reader, Quote[].class);
+//            if(quoteList.length>0)
+//            {
+//                Random random= new Random();
+//                int randomIndex = random.nextInt(quoteList.length);
+//                Quote randomQuote = quoteList[randomIndex];
+
+//                System.out.println("Quote: " + randomQuote.getText());
+//                System.out.println("Author: " + randomQuote.getAuthor());
+//            }else {
+//                System.out.println("Quote not found");
+//            }
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//}
