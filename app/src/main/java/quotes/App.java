@@ -4,12 +4,11 @@
 package quotes;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Type;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,29 +17,95 @@ import java.util.Random;
 public class App {
 
 
-    public static void main(String[] args) {
-        Gson gson = new Gson(); //creates an instance of the Gson class, which will be used to parse JSON data into Java objects.
-        List<Quote> quotes = new ArrayList<>();  // creating an ArrayList named quotes to store the parsed quotes.
-        // Each element in this list will be an instance of the Quote class.
-        //naming  the parameters should match the json file
-        // Here How it will be
+    public static void main(String[] args) throws IOException {
+        getQuoteFromApi();
+        Quote apiQuote = getQuoteFromApi();
+        addQuoteToFile(apiQuote);
+        Gson gson = new Gson();
+        List<Quote> quotes = new ArrayList<>();
+    }
 
-//           quotas = [
-//                   Quote(author, text ), based on the constructor of Quote class
-//                   Quote(author, text ),
-//                   Quote(author, text ),
-//            ....
-//                    ]
 
+    // Fetching Data From Api
+    public static Quote getQuoteFromApi() throws IOException {
+        URL url = null;
+        HttpURLConnection connection = null;
+        Gson gson = new Gson();
+
+        try {
+            url = new URL("https://favqs.com/api/qotd");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            String responseData = readResponseFromApi(connection);
+
+            writeQuoteToFile(responseData);
+
+            ApiResponse apiResponse = gson.fromJson(responseData, ApiResponse.class);
+            return apiResponse.getQuote();
+
+        } catch (IOException ex) {
+            System.out.println("URL Invalid: " + url);
+            ex.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return null;
+    }
+
+
+    // Reading Response From API
+public static String readResponseFromApi(HttpURLConnection connection) throws IOException {
+    String responseData = "";
+    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            responseData += line;
+        }
+    }
+    return responseData;
+}
+
+
+    // Writing Quote Data to JSON File
+    public static void writeQuoteToFile(String responseData) {
+        File quoteOfTheDayFile = new File("app/src/main/resources/quoteOfTheDay.json");
+        try (FileWriter writer = new FileWriter(quoteOfTheDayFile)) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            ApiResponse quoteOfTheDayResponse = gson.fromJson(responseData, ApiResponse.class);
+           gson.toJson(quoteOfTheDayResponse, writer);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void addQuoteToFile(Quote apiQuote) {
+        apiQuote.setFavorites_count(0);
+        String filePath = "app/src/main/resources/recentQuotes.json";
+        try (FileReader reader = new FileReader(filePath)) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            Quote[] existingQuotes = gson.fromJson(reader, Quote[].class);
+            List<Quote> updatedQuotes = new ArrayList<>(Arrays.asList(existingQuotes));
+            updatedQuotes.add(apiQuote);
+
+            try (FileWriter writer = new FileWriter(filePath)) {
+                gson.toJson(updatedQuotes.toArray(new Quote[0]), writer);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        Gson gson = new Gson();
+        List<Quote> quotes = new ArrayList<>();
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader("app/src/main/resources/recentQuotes.json"));
+            Quote[] quoteArray = gson.fromJson(reader, Quote[].class);
 
-            // fromJson() used to parse the JSON data read from the reader into an array of Quote objects.
-            Quote[] quoteArray = gson.fromJson(reader, Quote[].class); // Once the BF sees [ ] in the Json file, the return values will be and [ ]
-
-
-            //parsed Quote objects are then added to the quotes list using the addAll method.
             quotes.addAll(Arrays.asList(quoteArray));
         } catch (IOException e) {
             e.printStackTrace();
@@ -50,19 +115,24 @@ public class App {
             Random random = new Random();
             int index = random.nextInt(quotes.size());
 
-        //Example: quotes.size() is equal to 5.
-        //When you call random.nextInt(5), the nextInt method will generate a random integer from 0 to 4 (inclusive).
-        // This random integer will represent an index in the range of available quotes.
-        //For example, if random.nextInt(5) returns 2, it means the program will select the quote at index 2, which is quote3.
+
 
             Quote selectedQuote = quotes.get(index);
-            //selected quote at the randomly generated index is retrieved from the quotes list and stored
-            // in the selectedQuote variable
 
-            System.out.println("Quote: " + selectedQuote.getText());
+            System.out.println("Quote: " + selectedQuote.getBody());
             System.out.println("Author: " + selectedQuote.getAuthor());
+            System.out.println(selectedQuote);
         } else {
             System.out.println("No quotes available.");
         }
     }
-}
+    }
+
+
+
+
+
+
+
+
+
