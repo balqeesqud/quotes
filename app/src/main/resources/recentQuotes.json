@@ -1575,5 +1575,34 @@
     "tags": [
       "power"
     ]
+  },
+  {
+    "author": "Theodore Roosevelt",
+    "body": "Freedom from effort in the present merely means that there has been effort stored up in the past.",
+    "favorites_count": 2,
+    "tags": [
+      "freedom"
+    ]
+  },
+  {
+    "author": "Confucius",
+    "body": "They must often change, who would be constant in happiness or wisdom.",
+    "favorites_count": 1,
+    "tags": [
+      "change",
+      "happiness",
+      "wisdom"
+    ]
+  },
+  {
+    "author": "Søren Kierkegaard",
+    "body": "Life can only be understood backwards; but it must be lived forwards.",
+    "favorites_count": 12,
+    "tags": [
+      "life",
+      "meaning",
+      "danish",
+      "philosopher"
+    ]
   }
 ]
