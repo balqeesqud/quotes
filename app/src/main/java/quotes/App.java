@@ -119,9 +119,9 @@ public static String readResponseFromApi(HttpURLConnection connection) throws IO
 
             Quote selectedQuote = quotes.get(index);
 
-            System.out.println("Quote: " + selectedQuote.getBody());
+            System.out.println("Quote: " + selectedQuote.getText());
             System.out.println("Author: " + selectedQuote.getAuthor());
-            System.out.println(selectedQuote);
+//            System.out.println(selectedQuote);
         } else {
             System.out.println("No quotes available.");
         }
