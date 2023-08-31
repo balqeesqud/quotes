@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,43 +18,76 @@ import java.util.Random;
 public class App {
 
 
+    private static boolean offlineMode = false;
+
     public static void main(String[] args) throws IOException {
-        getQuoteFromApi();
+        if (!isInternetConnectionAvailable()) {
+            setOfflineMode();
+        }
+
         Quote apiQuote = getQuoteFromApi();
-        addQuoteToFile(apiQuote);
-        Gson gson = new Gson();
-        List<Quote> quotes = new ArrayList<>();
+//
+        if (apiQuote != null) {
+            addQuoteToFile(apiQuote);
+        } else {
+            System.out.println("Failed to fetch a quote.");
+        }
     }
 
+    public static void setOfflineMode() {
+        offlineMode = true;
+    }
 
-    // Fetching Data From Api
-    public static Quote getQuoteFromApi() throws IOException {
-        URL url = null;
-        HttpURLConnection connection = null;
-        Gson gson = new Gson();
-
+    public static boolean isInternetConnectionAvailable() {
         try {
-            url = new URL("https://favqs.com/api/qotd");
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            InetAddress.getByName("www.google.com");
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 
-            String responseData = readResponseFromApi(connection);
+        // Fetching Data From Api
 
-            writeQuoteToFile(responseData);
+        public static Quote getQuoteFromApi() {
+        if (!offlineMode) {
+            URL url = null;
+            HttpURLConnection connection = null;
+            Gson gson = new Gson();
 
-            ApiResponse apiResponse = gson.fromJson(responseData, ApiResponse.class);
-            return apiResponse.getQuote();
+            try {
+                url = new URL("https://favqs.com/api/qotd");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
 
-        } catch (IOException ex) {
-            System.out.println("URL Invalid: " + url);
-            ex.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
+                String responseData = readResponseFromApi(connection);
+
+                writeQuoteToFile(responseData);
+
+                ApiResponse apiResponse = gson.fromJson(responseData, ApiResponse.class);
+                return apiResponse.getQuote();
+
+            } catch (IOException ex) {
+                System.out.println("Error occurred while fetching data from the API: " + ex.getMessage());
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        } else {
+            String filePath = "app/src/main/resources/quoteOfTheDay.json";
+            try (FileReader reader = new FileReader(filePath)) {
+                Gson gson = new Gson();
+                ApiResponse quoteOfTheDayResponse = gson.fromJson(reader, ApiResponse.class);
+                return quoteOfTheDayResponse.getQuote();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
+
         return null;
     }
+
 
 
     // Reading Response From API
